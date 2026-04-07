@@ -13,5 +13,6 @@ cd /home/container || exit 1
 PARSED=$(echo "$STARTUP" | sed -e 's/{{/${/g' -e 's/}}/}/g')
 
 # Display the command we're running in the output, and then execute it
+# exec replaces the shell process so luantiserver gets direct stdin/stdout
 echo "container~ $PARSED"
-eval "$PARSED"
+exec $PARSED
