@@ -58,7 +58,7 @@ RUN cmake -B build \
 FROM $DOCKER_IMAGE AS runtime
 
 RUN apk add --no-cache curl gmp libstdc++ libgcc libpq jsoncpp zstd-libs \
-				sqlite-libs postgresql hiredis leveldb ncurses tini && \
+				sqlite-libs postgresql hiredis leveldb ncurses tini coreutils && \
 	adduser -D container --uid 1000 -h /home/container && \
 	chown -R container:container /home/container
 

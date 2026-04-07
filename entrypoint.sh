@@ -14,5 +14,6 @@ PARSED=$(echo "$STARTUP" | sed -e 's/{{/${/g' -e 's/}}/}/g')
 
 # Display the command we're running in the output, and then execute it
 # exec replaces the shell process so luantiserver gets direct stdin/stdout
+# stdbuf disables output buffering so ncurses redraws are captured immediately
 echo "container~ $PARSED"
-exec $PARSED
+exec stdbuf -o0 -e0 $PARSED
