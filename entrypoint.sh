@@ -4,6 +4,9 @@
 TZ=${TZ:-UTC}
 export TZ
 
+TERM=dumb
+export TERM
+
 # Switch to the container's working directory
 cd /home/container || exit 1
 
