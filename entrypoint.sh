@@ -4,9 +4,6 @@
 TZ=${TZ:-UTC}
 export TZ
 
-TERM=dumb
-export TERM
-
 # Switch to the container's working directory
 cd /home/container || exit 1
 
@@ -19,4 +16,4 @@ PARSED=$(echo "$STARTUP" | sed -e 's/{{/${/g' -e 's/}}/}/g')
 # exec replaces the shell process so luantiserver gets direct stdin/stdout
 # stdbuf disables output buffering so ncurses redraws are captured immediately
 echo "container~ $PARSED"
-exec stdbuf -o0 -e0 $PARSED
+exec $PARSED
