@@ -60,7 +60,7 @@ RUN git apply --whitespace=nowarn /tmp/patches/0001-pelican-terminal-plain-mode.
 FROM $DOCKER_IMAGE AS runtime
 
 RUN apk add --no-cache curl gmp libstdc++ libgcc libpq jsoncpp zstd-libs \
-				sqlite-libs postgresql hiredis leveldb ncurses tini && \
+				sqlite-libs postgresql hiredis leveldb ncurses tini su-exec && \
 	adduser -D container --uid 1000 -h /home/container && \
 	chown -R container:container /home/container
 
@@ -73,8 +73,6 @@ COPY --from=builder /usr/local/lib/libspatialindex* /usr/local/lib/
 COPY --from=builder /usr/local/lib/libluajit* /usr/local/lib/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-USER container:container
 
 EXPOSE 30000/udp 30000/tcp
 
