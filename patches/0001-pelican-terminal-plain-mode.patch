@@ -1,0 +1,266 @@
+diff --git a/src/terminal_chat_console.cpp b/src/terminal_chat_console.cpp
+index 66c08d850..28803dcec 100644
+--- a/src/terminal_chat_console.cpp
++++ b/src/terminal_chat_console.cpp
+@@ -8,8 +8,17 @@
+ #include "version.h"
+ #include "terminal_chat_console.h"
+ #include "util/string.h"
++#include "porting.h"
+ #include "chat_interface.h"
+ 
++#include <cstdlib>
++#include <cstring>
++
++#if !defined(_WIN32)
++#include <fcntl.h>
++#include <unistd.h>
++#endif
++
+ TerminalChatConsole g_term_console;
+ 
+ // include this last to avoid any conflicts
+@@ -42,6 +51,141 @@ static void move_for_backend(int row, int col)
+ 	move(row + 1, col);
+ }
+ 
++static bool env_var_true(const char *value)
++{
++	if (!value || !*value)
++		return false;
++
++	return std::strcmp(value, "0") != 0 &&
++		std::strcmp(value, "false") != 0 &&
++		std::strcmp(value, "FALSE") != 0;
++}
++
++static bool use_plain_terminal_mode()
++{
++	// Container control panels tend to emulate a PTY that does not play well
++	// with ncurses redraw semantics. Allow explicit opt-in and auto-enable for
++	// TERM=dumb style environments.
++	if (env_var_true(std::getenv("LUANTI_TERMINAL_PLAIN")))
++		return true;
++
++	const char *term = std::getenv("TERM");
++	if (!term)
++		return false;
++
++	return std::strcmp(term, "dumb") == 0 || std::strcmp(term, "unknown") == 0;
++}
++
++static std::string luanti_markup_to_ansi(std::wstring_view input)
++{
++	// Resolve translation escapes and convert Luanti color escapes
++	// (\x1b(c@...), \x1b(b@...)) to ANSI colors so panel consoles render
++	// colored output instead of raw Luanti escape fragments.
++	std::wstring text = translate_string(input);
++	std::wstring plain_buf;
++	std::string output;
++
++	video::SColor fg;
++	video::SColor bg;
++	bool has_fg = false;
++	bool has_bg = false;
++	bool has_ansi = false;
++
++	auto flush_plain = [&]() {
++		if (plain_buf.empty())
++			return;
++		output.append(wide_to_utf8(plain_buf));
++		plain_buf.clear();
++	};
++
++	auto append_ansi = [&]() {
++		if (!has_fg && !has_bg)
++			return;
++
++		output.append("\x1b[");
++		bool needs_sep = false;
++		if (has_fg) {
++			output.append("38;2;");
++			output.append(std::to_string(fg.getRed()));
++			output.push_back(';');
++			output.append(std::to_string(fg.getGreen()));
++			output.push_back(';');
++			output.append(std::to_string(fg.getBlue()));
++			needs_sep = true;
++		}
++		if (has_bg) {
++			if (needs_sep)
++				output.push_back(';');
++			output.append("48;2;");
++			output.append(std::to_string(bg.getRed()));
++			output.push_back(';');
++			output.append(std::to_string(bg.getGreen()));
++			output.push_back(';');
++			output.append(std::to_string(bg.getBlue()));
++		}
++		output.push_back('m');
++		has_ansi = true;
++	};
++
++	for (size_t i = 0; i < text.length();) {
++		if (text[i] != L'\x1b') {
++			plain_buf.push_back(text[i]);
++			++i;
++			continue;
++		}
++
++		++i;
++		if (i >= text.length())
++			break;
++
++		size_t start_index = i;
++		size_t length = 1;
++		if (text[i] == L'(') {
++			++i;
++			++start_index;
++			while (i < text.length() && text[i] != L')') {
++				if (text[i] == L'\\')
++					++i;
++				++i;
++			}
++			length = i - start_index;
++			if (i < text.length())
++				++i;
++		} else {
++			++i;
++		}
++
++		std::wstring esc(text, start_index, length);
++		auto parts = split(esc, L'@');
++		if (parts.empty())
++			continue;
++
++		if (parts[0] == L"c" && parts.size() > 1) {
++			video::SColor color;
++			if (parseColorString(wide_to_utf8(parts[1]), color, true, 255)) {
++				flush_plain();
++				fg = color;
++				has_fg = true;
++				append_ansi();
++			}
++		} else if (parts[0] == L"b" && parts.size() > 1) {
++			video::SColor color;
++			if (parseColorString(wide_to_utf8(parts[1]), color, true, 255)) {
++				flush_plain();
++				bg = color;
++				has_bg = true;
++				append_ansi();
++			}
++		}
++		// Translation escapes and unknown escapes are intentionally ignored.
++	}
++
++	flush_plain();
++	if (has_ansi)
++		output.append("\x1b[0m");
++	return output;
++}
++
+ void TerminalChatConsole::initOfCurses()
+ {
+ 	initscr();
+@@ -83,16 +227,94 @@ void *TerminalChatConsole::run()
+ 		new ChatEventNick(CET_NICK_ADD, m_nick));
+ 
+ 	{
+-		// Ensures that curses is deinitialized even on an exception being thrown
+-		CursesInitHelper helper(this);
++		if (use_plain_terminal_mode()) {
++			std::cout << "Using plain terminal mode (LUANTI_TERMINAL_PLAIN)"
++				<< std::endl;
+ 
+-		while (!stopRequested()) {
++			std::string pending_input;
+ 
+-			int ch = getch();
+-			if (stopRequested())
+-				break;
++#if !defined(_WIN32)
++			int old_stdin_flags = fcntl(STDIN_FILENO, F_GETFL);
++			bool restore_flags = old_stdin_flags >= 0;
++			if (restore_flags)
++				fcntl(STDIN_FILENO, F_SETFL, old_stdin_flags | O_NONBLOCK);
++#endif
++
++			while (!stopRequested()) {
++				while (!m_chat_interface->outgoing_queue.empty()) {
++					ChatEvent *evt = m_chat_interface->outgoing_queue.pop_frontNoEx();
++					switch (evt->type) {
++					case CET_NICK_REMOVE:
++						m_nicks.erase(((ChatEventNick *)evt)->nick);
++						break;
++					case CET_NICK_ADD:
++						m_nicks.insert(((ChatEventNick *)evt)->nick);
++						break;
++					case CET_CHAT:
++						std::cout
++							<< luanti_markup_to_ansi(((ChatEventChat *)evt)->evt_msg)
++							<< std::endl;
++						break;
++					case CET_TIME_INFO: {
++						ChatEventTimeInfo *tevt = (ChatEventTimeInfo *)evt;
++						m_game_time = tevt->game_time;
++						m_time_of_day = tevt->time;
++						break;
++					}
++					};
++					delete evt;
++				}
++
++				while (!m_log_output.queue.empty()) {
++					std::pair<LogLevel, std::string> p = m_log_output.queue.pop_frontNoEx();
++					if (p.first > m_log_level)
++						continue;
++					std::wstring line = utf8_to_wide(
++						std::string(Logger::getLevelLabel(p.first)) + " " + p.second);
++					std::cout << luanti_markup_to_ansi(line) << std::endl;
++				}
++
++#if !defined(_WIN32)
++				char buf[256];
++				ssize_t bytes_read = 0;
++				do {
++					bytes_read = read(STDIN_FILENO, buf, sizeof(buf));
++					if (bytes_read > 0)
++						pending_input.append(buf, bytes_read);
++				} while (bytes_read > 0);
++
++				size_t newline_pos = std::string::npos;
++				while ((newline_pos = pending_input.find_first_of("\r\n")) != std::string::npos) {
++					std::string line = pending_input.substr(0, newline_pos);
++					pending_input.erase(0, newline_pos + 1);
++
++					if (line.empty())
++						continue;
++
++					typeChatMessage(utf8_to_wide(line));
++					if (!line.empty() && line[0] == '/')
++						std::cout << "Issued command: " << line << std::endl;
++				}
++#endif
+ 
+-			step(ch);
++				sleep_ms(25);
++			}
++
++#if !defined(_WIN32)
++			if (restore_flags)
++				fcntl(STDIN_FILENO, F_SETFL, old_stdin_flags);
++#endif
++		} else {
++			// Ensures that curses is deinitialized even on an exception being thrown
++			CursesInitHelper helper(this);
++
++			while (!stopRequested()) {
++				int ch = getch();
++				if (stopRequested())
++					break;
++
++				step(ch);
++			}
+ 		}
+ 	}
+ 

@@ -13,6 +13,8 @@ The [official Luanti Docker image](https://github.com/luanti-org/luanti/pkgs/con
 This image solves both problems by:
 - Using a [Pelican-compatible entrypoint](entrypoint.sh) that reads the `STARTUP` env var and executes it (the same pattern used by [pelican-eggs/yolks](https://github.com/pelican-eggs/yolks) images)
 - Compiling Luanti from source with `ENABLE_CURSES=TRUE` so `--terminal` works and the Pelican console can send commands to the server
+- Applying a small source patch during build that adds a plain (non-ncurses) terminal path for panel PTYs, enabled by default with `LUANTI_TERMINAL_PLAIN=1` in this container
+- Translating Luanti terminal escape markup to ANSI colors in plain mode, so panel logs stay readable and colored without raw `@...` markers
 
 ## Image
 
@@ -37,4 +39,5 @@ A GitHub Action checks daily for new [Luanti releases](https://github.com/luanti
 
 ## Known limitations
 
-- **Console output delay** — Due to how ncurses manages screen redraws inside a Docker container, command output in the Pelican console may appear delayed by one input. Commands still execute immediately; the display just updates on the next interaction. This is a cosmetic issue inherent to running ncurses applications in containers.
+- This image defaults to Luanti plain terminal mode for panel compatibility. If you force `LUANTI_TERMINAL_PLAIN=0`, ncurses behavior depends on your host PTY implementation and may reintroduce delayed redraw issues.
+- Upstream Luanti terminal internals can change between releases; the patch may occasionally need updates when new Luanti versions are published.

@@ -41,9 +41,11 @@ FROM dev AS builder
 
 ARG LUANTI_VERSION
 ADD --keep-git-dir https://github.com/luanti-org/luanti.git?ref=${LUANTI_VERSION} /usr/src/luanti
+COPY patches/ /tmp/patches/
 
 WORKDIR /usr/src/luanti
-RUN cmake -B build \
+RUN git apply --whitespace=nowarn /tmp/patches/0001-pelican-terminal-plain-mode.patch && \
+	cmake -B build \
 		-DCMAKE_INSTALL_PREFIX=/usr/local \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DBUILD_SERVER=TRUE \
