@@ -40,7 +40,7 @@ RUN cd prometheus-cpp && \
 FROM dev AS builder
 
 ARG LUANTI_VERSION
-ADD --keep-git-dir https://github.com/luanti-org/luanti.git?branch=${LUANTI_VERSION} /usr/src/luanti
+ADD --keep-git-dir https://github.com/luanti-org/luanti.git?ref=${LUANTI_VERSION} /usr/src/luanti
 
 WORKDIR /usr/src/luanti
 RUN cmake -B build \
