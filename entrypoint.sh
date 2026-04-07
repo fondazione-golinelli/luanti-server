@@ -12,6 +12,50 @@ env_enabled() {
 	esac
 }
 
+fix_path_permissions() {
+	path="$1"
+	if [ ! -e "$path" ]; then
+		return 0
+	fi
+
+	if [ -d "$path" ]; then
+		fix_dir_tree "$path"
+		return 0
+	fi
+
+	if ! chmod u+rw "$path" 2>/dev/null; then
+		echo "warning: failed to normalize permissions on $path" >&2
+	fi
+}
+
+fix_dir_tree() {
+	dir="$1"
+
+	# Ensure this directory can be traversed before processing children.
+	if ! chmod u+rwx "$dir" 2>/dev/null; then
+		echo "warning: failed to normalize directory permissions on $dir" >&2
+		return 0
+	fi
+
+	for entry in "$dir"/* "$dir"/.[!.]* "$dir"/..?*; do
+		[ -e "$entry" ] || continue
+
+		# Skip symlinks to avoid loops and cross-tree permission edits.
+		if [ -h "$entry" ]; then
+			continue
+		fi
+
+		if [ -d "$entry" ]; then
+			fix_dir_tree "$entry"
+			continue
+		fi
+
+		if ! chmod u+rw "$entry" 2>/dev/null; then
+			echo "warning: failed to normalize file permissions on $entry" >&2
+		fi
+	done
+}
+
 # Default the TZ environment variable to UTC.
 TZ=${TZ:-UTC}
 export TZ
@@ -26,13 +70,31 @@ export LUANTI_TERMINAL_PLAIN
 LUANTI_FIX_PERMS=${LUANTI_FIX_PERMS:-1}
 export LUANTI_FIX_PERMS
 
-if [ "$(id -u)" -eq 0 ] && env_enabled "$LUANTI_FIX_PERMS"; then
+if env_enabled "$LUANTI_FIX_PERMS"; then
 	mkdir -p /home/container/.luanti /home/container/.cache/luanti
-	if ! chown -R container:container \
+
+	# Ensure uploaded files/directories are usable by the current runtime user.
+	# This also fixes broken directory mode bits (missing +x) from some uploads.
+	for path in \
 		/home/container/.luanti \
 		/home/container/.cache/luanti \
-		/home/container/server.log 2>/dev/null; then
-		echo "warning: failed to adjust ownership on one or more Luanti paths" >&2
+		/home/container/.minetest \
+		/home/container/server.log
+	do
+		fix_path_permissions "$path"
+	done
+
+	if [ "$(id -u)" -eq 0 ]; then
+		for path in \
+			/home/container/.luanti \
+			/home/container/.cache/luanti \
+			/home/container/.minetest \
+			/home/container/server.log
+		do
+			if [ -e "$path" ] && ! chown -R container:container "$path" 2>/dev/null; then
+				echo "warning: failed to adjust ownership on $path" >&2
+			fi
+		done
 	fi
 fi
 

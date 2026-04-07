@@ -15,7 +15,7 @@ This image solves both problems by:
 - Compiling Luanti from source with `ENABLE_CURSES=TRUE` so `--terminal` works and the Pelican console can send commands to the server
 - Applying a small source patch during build that adds a plain (non-ncurses) terminal path for panel PTYs, enabled by default with `LUANTI_TERMINAL_PLAIN=1` in this container
 - Translating Luanti terminal escape markup to ANSI colors in plain mode, so panel logs stay readable and colored without raw `@...` markers
-- Fixing ownership for Luanti data directories at startup (`chown -R`) so worlds uploaded through SFTP don't fail due to UID/GID mismatches
+- Normalizing Luanti file permissions at startup (`chmod -R u+rwX`, plus `chown -R` when running as root) so uploaded worlds don't fail due to ownership/mode mismatches
 
 ## Image
 
@@ -64,13 +64,20 @@ By default, this image sets:
 LUANTI_FIX_PERMS=1
 ```
 
-When enabled, the entrypoint starts as root, runs a recursive `chown` on:
+When enabled, the entrypoint always runs a recursive:
+
+- `chmod -R u+rwX` on Luanti data paths (fixes missing directory execute bits from broken uploads)
+
+If the container is running as root, it also runs:
+
+- `chown -R container:container` on those same paths
+
+Affected paths:
 
 - `/home/container/.luanti`
 - `/home/container/.cache/luanti`
+- `/home/container/.minetest` (if present)
 - `/home/container/server.log` (if present)
-
-Then it drops privileges and starts Luanti as the `container` user.
 
 If you do not want this behavior, set:
 
@@ -81,5 +88,5 @@ LUANTI_FIX_PERMS=0
 ## Known limitations
 
 - This image defaults to Luanti plain terminal mode for panel compatibility. If you force `LUANTI_TERMINAL_PLAIN=0`, ncurses behavior depends on your host PTY implementation and may reintroduce delayed redraw issues.
-- Startup permission fixing (`LUANTI_FIX_PERMS=1`) can take noticeable time on very large worlds because it runs a recursive `chown`.
+- Startup permission fixing (`LUANTI_FIX_PERMS=1`) can take noticeable time on very large worlds because it runs recursive `chmod` (and `chown` when root).
 - Upstream Luanti terminal internals can change between releases; the patch may occasionally need updates when new Luanti versions are published.
