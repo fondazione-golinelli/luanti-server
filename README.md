@@ -37,6 +37,24 @@ Import it into your Pelican panel to get a ready-to-use Luanti server egg with s
 
 A GitHub Action checks daily for new [Luanti releases](https://github.com/luanti-org/luanti/releases). When a new version is detected, the image is automatically built and published to GHCR. Builds can also be triggered manually via workflow dispatch.
 
+## Terminal behavior in Pelican
+
+By default, this image sets:
+
+```
+LUANTI_TERMINAL_PLAIN=1
+```
+
+This keeps `--terminal` command input support but bypasses ncurses screen redraw logic, which avoids the common one-line-delayed output issue in panel PTYs.
+
+In plain mode, Luanti terminal markup is converted to ANSI colors before printing, so logs stay readable in Pelican without raw `@...` formatting artifacts.
+
+If you want to test the upstream ncurses terminal behavior, set:
+
+```
+LUANTI_TERMINAL_PLAIN=0
+```
+
 ## Known limitations
 
 - This image defaults to Luanti plain terminal mode for panel compatibility. If you force `LUANTI_TERMINAL_PLAIN=0`, ncurses behavior depends on your host PTY implementation and may reintroduce delayed redraw issues.
