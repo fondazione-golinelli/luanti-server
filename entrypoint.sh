@@ -30,6 +30,75 @@ int_or_default() {
 	esac
 }
 
+bootstrap_instance_template() {
+	kind="${LUANTI_SERVER_KIND:-standard}"
+	template_name="${INSTANCE_TEMPLATE_NAME:-}"
+	template_mount="${INSTANCE_TEMPLATE_MOUNT:-/mnt/presets}"
+	template_marker="/home/container/.pelican-instance-template"
+
+	if [ "$kind" != "instance" ]; then
+		return 0
+	fi
+
+	if [ -f "$template_marker" ]; then
+		echo "Instance template already bootstrapped."
+		return 0
+	fi
+
+	if [ -z "$template_name" ]; then
+		echo "error: INSTANCE_TEMPLATE_NAME is required when LUANTI_SERVER_KIND=instance" >&2
+		exit 1
+	fi
+
+	template_dir="${template_mount%/}/$template_name"
+	if [ ! -d "$template_dir" ]; then
+		echo "error: instance template directory not found: $template_dir" >&2
+		exit 1
+	fi
+
+	echo "Bootstrapping instance template from $template_dir"
+	cp -R "$template_dir"/. /home/container/
+	touch "$template_marker"
+}
+
+escape_sed_replacement() {
+	printf '%s' "${1:-}" | sed 's/[\/&]/\\&/g'
+}
+
+set_config_value() {
+	file="$1"
+	key="$2"
+	value="$3"
+	escaped=$(escape_sed_replacement "$value")
+
+	if grep -Eq "^${key}[[:space:]]*=" "$file"; then
+		sed -i "s#^${key}[[:space:]]*=.*#${key} = ${escaped}#" "$file"
+		return 0
+	fi
+
+	printf '%s = %s\n' "$key" "$value" >> "$file"
+}
+
+apply_luanti_config() {
+	config_file="/home/container/.luanti/luanti.conf"
+
+	mkdir -p /home/container/.luanti
+	[ -f "$config_file" ] || : > "$config_file"
+
+	set_config_value "$config_file" "name" "${SERVER_ADMIN_NAME:-}"
+	set_config_value "$config_file" "server_name" "${SERVER_NAME:-}"
+	set_config_value "$config_file" "server_description" "${SERVER_DESC:-}"
+	set_config_value "$config_file" "server_address" "${SERVER_DOMAIN:-}"
+	set_config_value "$config_file" "server_url" "${SERVER_URL:-}"
+	set_config_value "$config_file" "server_announce" "${SERVER_ANNOUNCE:-}"
+	set_config_value "$config_file" "serverlist_url" "${SERVER_LIST_URL:-}"
+	set_config_value "$config_file" "motd" "${SERVER_MOTD:-}"
+	set_config_value "$config_file" "max_users" "${SERVER_MAX_USERS:-}"
+	set_config_value "$config_file" "bind_address" "0.0.0.0"
+	set_config_value "$config_file" "default_password" "${SERVER_PASSWORD:-}"
+	set_config_value "$config_file" "default_game" "${DEFAULT_GAME:-}"
+}
+
 fix_path_permissions() {
 	path="$1"
 	if [ ! -e "$path" ]; then
@@ -93,6 +162,9 @@ export LUANTI_FIX_PERMS
 # on the shared Docker network behind mt-multiserver-proxy.
 SERVER_PORT=$(int_or_default "${SERVER_PORT:-}" "${LUANTI_INTERNAL_PORT:-30000}")
 export SERVER_PORT
+
+bootstrap_instance_template
+apply_luanti_config
 
 if env_enabled "$LUANTI_FIX_PERMS"; then
 	mkdir -p /home/container/.luanti /home/container/.cache/luanti
