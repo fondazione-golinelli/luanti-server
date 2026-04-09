@@ -12,6 +12,24 @@ env_enabled() {
 	esac
 }
 
+int_or_default() {
+	value="${1:-}"
+	fallback="$2"
+
+	case "$value" in
+		''|0)
+			printf '%s' "$fallback"
+			;;
+		*[!0-9]*)
+			echo "error: invalid integer value: $value" >&2
+			exit 1
+			;;
+		*)
+			printf '%s' "$value"
+			;;
+	esac
+}
+
 fix_path_permissions() {
 	path="$1"
 	if [ ! -e "$path" ]; then
@@ -69,6 +87,12 @@ export LUANTI_TERMINAL_PLAIN
 # Set LUANTI_FIX_PERMS=0 to disable.
 LUANTI_FIX_PERMS=${LUANTI_FIX_PERMS:-1}
 export LUANTI_FIX_PERMS
+
+# If Pelican creates a server without an allocation it injects SERVER_PORT=0.
+# Normalize that to a stable internal-only port so the server can still listen
+# on the shared Docker network behind mt-multiserver-proxy.
+SERVER_PORT=$(int_or_default "${SERVER_PORT:-}" "${LUANTI_INTERNAL_PORT:-30000}")
+export SERVER_PORT
 
 if env_enabled "$LUANTI_FIX_PERMS"; then
 	mkdir -p /home/container/.luanti /home/container/.cache/luanti

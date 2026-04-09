@@ -16,6 +16,7 @@ This image solves both problems by:
 - Applying a small source patch during build that adds a plain (non-ncurses) terminal path for panel PTYs, enabled by default with `LUANTI_TERMINAL_PLAIN=1` in this container
 - Translating Luanti terminal escape markup to ANSI colors in plain mode, so panel logs stay readable and colored without raw `@...` markers
 - Normalizing Luanti file permissions at startup (`chmod -R u+rwX`, plus `chown -R` when running as root) so uploaded worlds don't fail due to ownership/mode mismatches
+- Converting Pelican's allocation-less `SERVER_PORT=0` case into a stable internal port (`30000` by default) so internal-only servers can run behind `mt-multiserver-proxy` without needing a public allocation
 
 ## Image
 
@@ -84,6 +85,18 @@ If you do not want this behavior, set:
 ```
 LUANTI_FIX_PERMS=0
 ```
+
+## Internal-only servers
+
+When a server is created through the Pelican application API without an allocation, Pelican injects `SERVER_PORT=0` into the container environment.
+
+This image treats that as:
+
+```text
+SERVER_PORT=${LUANTI_INTERNAL_PORT:-30000}
+```
+
+That gives you a stable internal port for servers that should only be reachable over the shared Docker network, which is a good fit for `mt-multiserver-proxy`-managed minigame instances.
 
 ## Known limitations
 
