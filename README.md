@@ -35,6 +35,15 @@ An egg configuration file is included in this repo: [egg-luanti.json](egg-luanti
 
 Import it into your Pelican panel to get a ready-to-use Luanti server egg with support for community game downloads, server configuration, and more.
 
+The egg also supports instance-style template bootstrapping:
+
+- set `LUANTI_SERVER_KIND=instance`
+- attach a read-only mount containing preset server directories
+- set `INSTANCE_TEMPLATE_MOUNT` to the mount target inside the container
+- set `INSTANCE_TEMPLATE_NAME` to the preset subdirectory to clone
+
+On first install, the installer copies that preset into the server volume before the server starts.
+
 ## Automatic builds
 
 A GitHub Action checks daily for new [Luanti releases](https://github.com/luanti-org/luanti/releases). When a new version is detected, the image is automatically built and published to GHCR. Builds can also be triggered manually via workflow dispatch.
@@ -103,3 +112,4 @@ That gives you a stable internal port for servers that should only be reachable 
 - This image defaults to Luanti plain terminal mode for panel compatibility. If you force `LUANTI_TERMINAL_PLAIN=0`, ncurses behavior depends on your host PTY implementation and may reintroduce delayed redraw issues.
 - Startup permission fixing (`LUANTI_FIX_PERMS=1`) can take noticeable time on very large worlds because it runs recursive `chmod` (and `chown` when root).
 - Upstream Luanti terminal internals can change between releases; the patch may occasionally need updates when new Luanti versions are published.
+- For Pelican mounts to work, the mount source path must exist from the `wings` container's point of view. A good default is to store presets under `/var/lib/pelican/...`, since that path is already mounted into Wings in this deployment.
