@@ -258,6 +258,20 @@
       "sort": null
     },
     {
+      "name": "Enable mod channels",
+      "description": "Enable Luanti modchannels so server-side bridge mods can talk to mt-multiserver-proxy.",
+      "env_variable": "LUANTI_ENABLE_MOD_CHANNELS",
+      "default_value": "true",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "required",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
       "name": "Server url",
       "description": "Homepage of server, to be displayed in the serverlist.",
       "env_variable": "SERVER_URL",

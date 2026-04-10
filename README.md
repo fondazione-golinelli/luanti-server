@@ -18,6 +18,7 @@ This image solves both problems by:
 - Normalizing Luanti file permissions at startup (`chmod -R u+rwX`, plus `chown -R` when running as root) so uploaded worlds don't fail due to ownership/mode mismatches
 - Converting Pelican's allocation-less `SERVER_PORT=0` case into a stable internal port (`30000` by default) so internal-only servers can run behind `mt-multiserver-proxy` without needing a public allocation
 - Reapplying the key `luanti.conf` values from Pelican env vars on container start, so first-boot template cloning does not leave stale preset metadata behind
+- Enabling server-side modchannels by default (`LUANTI_ENABLE_MOD_CHANNELS=true`), which makes it easy for lobby mods to talk to `mt-multiserver-proxy` bridge plugins
 
 ## Image
 
@@ -46,6 +47,8 @@ The egg also supports instance-style template bootstrapping:
 On first boot, the container entrypoint copies that preset into the server volume before starting Luanti.
 
 This is intentional: Pelican/Wings does not expose custom server mounts inside the install container, so template cloning cannot reliably happen in the egg install script. The runtime container does receive the mount when it is created from the up-to-date server configuration.
+
+If you want to drive proxy actions from inside Luanti using a server-side mod, leave `LUANTI_ENABLE_MOD_CHANNELS=true` in the egg so the bridge mod can use modchannels immediately.
 
 ## Automatic builds
 

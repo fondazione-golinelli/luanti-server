@@ -97,6 +97,7 @@ apply_luanti_config() {
 	set_config_value "$config_file" "bind_address" "0.0.0.0"
 	set_config_value "$config_file" "default_password" "${SERVER_PASSWORD:-}"
 	set_config_value "$config_file" "default_game" "${DEFAULT_GAME:-}"
+	set_config_value "$config_file" "enable_mod_channels" "${LUANTI_ENABLE_MOD_CHANNELS:-true}"
 }
 
 fix_path_permissions() {
@@ -151,6 +152,11 @@ export TZ
 # Set LUANTI_TERMINAL_PLAIN=0 to force full ncurses UI.
 LUANTI_TERMINAL_PLAIN=${LUANTI_TERMINAL_PLAIN:-1}
 export LUANTI_TERMINAL_PLAIN
+
+# Enable server-side modchannels by default so proxy bridge mods can talk to
+# mt-multiserver-proxy without extra container-side patching.
+LUANTI_ENABLE_MOD_CHANNELS=${LUANTI_ENABLE_MOD_CHANNELS:-true}
+export LUANTI_ENABLE_MOD_CHANNELS
 
 # Fix ownership on Luanti data paths at startup (helpful for SFTP uploads).
 # Set LUANTI_FIX_PERMS=0 to disable.
