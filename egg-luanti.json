@@ -311,6 +311,20 @@
         "max:32"
       ],
       "sort": null
+    },
+    {
+      "name": "Shared mods path",
+      "description": "Additional mod search path inside the container (e.g. /home/mods). Mount a shared directory here via Pelican mounts so all servers share the same mods.",
+      "env_variable": "MINETEST_MOD_PATH",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": [
+        "nullable",
+        "string",
+        "max:255"
+      ],
+      "sort": null
     }
   ]
 }
