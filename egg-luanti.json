@@ -173,16 +173,30 @@
       "sort": null
     },
     {
+      "name": "User data path",
+      "description": "Luanti user data directory. Keep this at /home/container/.luanti unless you are intentionally moving all server data.",
+      "env_variable": "LUANTI_USER_PATH",
+      "default_value": "/home/container/.luanti",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "required",
+        "string",
+        "max:255"
+      ],
+      "sort": null
+    },
+    {
       "name": "Game PATH",
-      "description": "",
-      "env_variable": "MINETEST_GAME_PATH",
+      "description": "Additional game search path. Defaults to the server-local .luanti/games directory.",
+      "env_variable": "LUANTI_GAME_PATH",
       "default_value": "/home/container/.luanti/games",
       "user_viewable": false,
       "user_editable": false,
       "rules": [
         "required",
         "string",
-        "max:64"
+        "max:255"
       ],
       "sort": null
     },
@@ -315,12 +329,26 @@
     {
       "name": "Shared mods path",
       "description": "Additional mod search path inside the container (e.g. /home/mods). Mount a shared directory here via Pelican mounts so all servers share the same mods.",
-      "env_variable": "MINETEST_MOD_PATH",
-      "default_value": "",
+      "env_variable": "LUANTI_MOD_PATH",
+      "default_value": "/home/container/.luanti/mods",
       "user_viewable": true,
       "user_editable": true,
       "rules": [
-        "nullable",
+        "required",
+        "string",
+        "max:255"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Mod data path",
+      "description": "Directory used by container startup helpers for mod-owned persistent data, including classroom pending settings.",
+      "env_variable": "LUANTI_MOD_DATA_PATH",
+      "default_value": "/home/container/.luanti/mod_data",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "required",
         "string",
         "max:255"
       ],

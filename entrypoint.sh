@@ -100,6 +100,53 @@ apply_luanti_config() {
 	set_config_value "$config_file" "enable_mod_channels" "${LUANTI_ENABLE_MOD_CHANNELS:-true}"
 }
 
+is_classrooms_pending_key() {
+	case "$1" in
+		enable_damage|enable_pvp|mcl_enable_hunger|mobs_spawn|only_peaceful_mobs|mcl_explosions_griefing|static_spawnpoint|classrooms_spawn_yaw|classrooms_spawn_pitch)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+apply_classrooms_pending_settings() {
+	config_file="/home/container/.luanti/luanti.conf"
+	pending_file="${CLASSROOMS_PENDING_SETTINGS_FILE:-${LUANTI_MOD_DATA_PATH}/classrooms_bridge/instance_settings.conf}"
+
+	if [ ! -f "$pending_file" ]; then
+		return 0
+	fi
+
+	echo "Applying classroom-managed pending settings from $pending_file"
+
+	while IFS= read -r line || [ -n "$line" ]; do
+		case "$line" in
+			''|\#*)
+				continue
+				;;
+			*=*)
+				key="${line%%=*}"
+				value="${line#*=}"
+				key="$(printf '%s' "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+				value="$(printf '%s' "$value" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+				;;
+			*)
+				echo "error: invalid classroom pending setting line: $line" >&2
+				exit 1
+				;;
+		esac
+
+		if ! is_classrooms_pending_key "$key"; then
+			echo "error: unsupported classroom pending setting key: $key" >&2
+			exit 1
+		fi
+
+		set_config_value "$config_file" "$key" "$value"
+	done < "$pending_file"
+}
+
 fix_path_permissions() {
 	path="$1"
 	if [ ! -e "$path" ]; then
@@ -158,6 +205,21 @@ export LUANTI_TERMINAL_PLAIN
 LUANTI_ENABLE_MOD_CHANNELS=${LUANTI_ENABLE_MOD_CHANNELS:-true}
 export LUANTI_ENABLE_MOD_CHANNELS
 
+# Force the user-data directory to .luanti so mods, games, worlds, and mod_data
+# resolve under /home/container/.luanti even if a legacy .minetest directory exists.
+LUANTI_USER_PATH=${LUANTI_USER_PATH:-/home/container/.luanti}
+export LUANTI_USER_PATH
+
+# Optional overrides for mounted games/mods/mod_data outside /home/container.
+LUANTI_GAME_PATH=${LUANTI_GAME_PATH:-/home/container/.luanti/games}
+export LUANTI_GAME_PATH
+
+LUANTI_MOD_PATH=${LUANTI_MOD_PATH:-/home/container/.luanti/mods}
+export LUANTI_MOD_PATH
+
+LUANTI_MOD_DATA_PATH=${LUANTI_MOD_DATA_PATH:-$LUANTI_USER_PATH/mod_data}
+export LUANTI_MOD_DATA_PATH
+
 # Fix ownership on Luanti data paths at startup (helpful for SFTP uploads).
 # Set LUANTI_FIX_PERMS=0 to disable.
 LUANTI_FIX_PERMS=${LUANTI_FIX_PERMS:-1}
@@ -171,6 +233,7 @@ export SERVER_PORT
 
 bootstrap_instance_template
 apply_luanti_config
+apply_classrooms_pending_settings
 
 if env_enabled "$LUANTI_FIX_PERMS"; then
 	mkdir -p /home/container/.luanti /home/container/.cache/luanti
@@ -180,7 +243,6 @@ if env_enabled "$LUANTI_FIX_PERMS"; then
 	for path in \
 		/home/container/.luanti \
 		/home/container/.cache/luanti \
-		/home/container/.minetest \
 		/home/container/server.log
 	do
 		fix_path_permissions "$path"
@@ -190,7 +252,6 @@ if env_enabled "$LUANTI_FIX_PERMS"; then
 		for path in \
 			/home/container/.luanti \
 			/home/container/.cache/luanti \
-			/home/container/.minetest \
 			/home/container/server.log
 		do
 			if [ -e "$path" ] && ! chown -R container:container "$path" 2>/dev/null; then
