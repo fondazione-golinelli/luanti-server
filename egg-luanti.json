@@ -45,7 +45,7 @@
         "string",
         "in:standard,instance"
       ],
-      "sort": 0
+      "sort": null
     },
     {
       "name": "Instance template name",
@@ -59,7 +59,7 @@
         "string",
         "max:128"
       ],
-      "sort": 1
+      "sort": null
     },
     {
       "name": "Instance template mount",
@@ -73,7 +73,7 @@
         "string",
         "max:255"
       ],
-      "sort": 2
+      "sort": null
     },
     {
       "name": "Announce serverlist",
@@ -86,7 +86,7 @@
         "required",
         "string"
       ],
-      "sort": 3
+      "sort": null
     },
     {
       "name": "Community download",
@@ -99,7 +99,7 @@
         "required",
         "boolean"
       ],
-      "sort": 4
+      "sort": null
     },
     {
       "name": "Community game author",
@@ -113,7 +113,7 @@
         "string",
         "max:64"
       ],
-      "sort": 5
+      "sort": null
     },
     {
       "name": "Community game name",
@@ -127,7 +127,7 @@
         "string",
         "max:64"
       ],
-      "sort": 6
+      "sort": null
     },
     {
       "name": "Description of the server",
@@ -141,7 +141,7 @@
         "string",
         "max:64"
       ],
-      "sort": 7
+      "sort": null
     },
     {
       "name": "Domain name of the server",
@@ -154,7 +154,7 @@
         "required",
         "string"
       ],
-      "sort": 8
+      "sort": null
     },
     {
       "name": "Game name",
@@ -168,7 +168,7 @@
         "string",
         "max:32"
       ],
-      "sort": 9
+      "sort": null
     },
     {
       "name": "Luanti user data path",
@@ -182,7 +182,7 @@
         "string",
         "max:255"
       ],
-      "sort": 10
+      "sort": null
     },
     {
       "name": "Luanti game path",
@@ -196,7 +196,7 @@
         "string",
         "max:255"
       ],
-      "sort": 11
+      "sort": null
     },
     {
       "name": "Max Players",
@@ -211,7 +211,7 @@
         "min:0",
         "max:65535"
       ],
-      "sort": 12
+      "sort": null
     },
     {
       "name": "message of the day",
@@ -225,7 +225,7 @@
         "string",
         "max:128"
       ],
-      "sort": 13
+      "sort": null
     },
     {
       "name": "Name of the admin player.",
@@ -239,7 +239,7 @@
         "string",
         "max:32"
       ],
-      "sort": 14
+      "sort": null
     },
     {
       "name": "Server name",
@@ -253,7 +253,7 @@
         "string",
         "max:64"
       ],
-      "sort": 15
+      "sort": null
     },
     {
       "name": "Server password",
@@ -267,7 +267,7 @@
         "string",
         "max:64"
       ],
-      "sort": 16
+      "sort": null
     },
     {
       "name": "Enable mod channels",
@@ -281,7 +281,7 @@
         "string",
         "in:true,false"
       ],
-      "sort": 17
+      "sort": null
     },
     {
       "name": "Server url",
@@ -294,7 +294,7 @@
         "required",
         "string"
       ],
-      "sort": 18
+      "sort": null
     },
     {
       "name": "Show in server list",
@@ -307,7 +307,7 @@
         "string",
         "in:true,false"
       ],
-      "sort": 19
+      "sort": null
     },
     {
       "name": "World name",
@@ -321,7 +321,7 @@
         "string",
         "max:32"
       ],
-      "sort": 20
+      "sort": null
     },
     {
       "name": "Luanti shared mods path",
@@ -335,7 +335,7 @@
         "string",
         "max:255"
       ],
-      "sort": 21
+      "sort": null
     },
     {
       "name": "Luanti mod data path",
@@ -349,7 +349,7 @@
         "string",
         "max:255"
       ],
-      "sort": 22
+      "sort": null
     }
   ]
 }

@@ -208,14 +208,17 @@ export LUANTI_ENABLE_MOD_CHANNELS
 # Force the user-data directory to .luanti so mods, games, worlds, and mod_data
 # resolve under /home/container/.luanti even if a legacy .minetest directory exists.
 LUANTI_USER_PATH=${LUANTI_USER_PATH:-/home/container/.luanti}
-export LUANTI_USER_PATH
+MINETEST_USER_PATH="$LUANTI_USER_PATH"
+export LUANTI_USER_PATH MINETEST_USER_PATH
 
 # Optional overrides for mounted games/mods/mod_data outside /home/container.
 LUANTI_GAME_PATH=${LUANTI_GAME_PATH:-/home/container/.luanti/games}
-export LUANTI_GAME_PATH
+MINETEST_GAME_PATH="$LUANTI_GAME_PATH"
+export LUANTI_GAME_PATH MINETEST_GAME_PATH
 
 LUANTI_MOD_PATH=${LUANTI_MOD_PATH:-/home/container/.luanti/mods}
-export LUANTI_MOD_PATH
+MINETEST_MOD_PATH="$LUANTI_MOD_PATH"
+export LUANTI_MOD_PATH MINETEST_MOD_PATH
 
 LUANTI_MOD_DATA_PATH=${LUANTI_MOD_DATA_PATH:-$LUANTI_USER_PATH/mod_data}
 export LUANTI_MOD_DATA_PATH
