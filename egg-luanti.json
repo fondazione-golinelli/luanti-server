@@ -45,7 +45,7 @@
         "string",
         "in:standard,instance"
       ],
-      "sort": null
+      "sort": 0
     },
     {
       "name": "Instance template name",
@@ -59,7 +59,7 @@
         "string",
         "max:128"
       ],
-      "sort": null
+      "sort": 1
     },
     {
       "name": "Instance template mount",
@@ -73,7 +73,7 @@
         "string",
         "max:255"
       ],
-      "sort": null
+      "sort": 2
     },
     {
       "name": "Announce serverlist",
@@ -84,10 +84,9 @@
       "user_editable": true,
       "rules": [
         "required",
-        "string",
-        ""
+        "string"
       ],
-      "sort": null
+      "sort": 3
     },
     {
       "name": "Community download",
@@ -100,7 +99,7 @@
         "required",
         "boolean"
       ],
-      "sort": null
+      "sort": 4
     },
     {
       "name": "Community game author",
@@ -114,7 +113,7 @@
         "string",
         "max:64"
       ],
-      "sort": null
+      "sort": 5
     },
     {
       "name": "Community game name",
@@ -128,7 +127,7 @@
         "string",
         "max:64"
       ],
-      "sort": null
+      "sort": 6
     },
     {
       "name": "Description of the server",
@@ -142,7 +141,7 @@
         "string",
         "max:64"
       ],
-      "sort": null
+      "sort": 7
     },
     {
       "name": "Domain name of the server",
@@ -153,10 +152,9 @@
       "user_editable": true,
       "rules": [
         "required",
-        "string",
-        ""
+        "string"
       ],
-      "sort": null
+      "sort": 8
     },
     {
       "name": "Game name",
@@ -170,35 +168,35 @@
         "string",
         "max:32"
       ],
-      "sort": null
+      "sort": 9
     },
     {
       "name": "User data path",
       "description": "Luanti user data directory. Keep this at /home/container/.luanti unless you are intentionally moving all server data.",
       "env_variable": "LUANTI_USER_PATH",
       "default_value": "/home/container/.luanti",
-      "user_viewable": false,
-      "user_editable": false,
+      "user_viewable": true,
+      "user_editable": true,
       "rules": [
         "required",
         "string",
         "max:255"
       ],
-      "sort": null
+      "sort": 10
     },
     {
       "name": "Game PATH",
       "description": "Additional game search path. Defaults to the server-local .luanti/games directory.",
       "env_variable": "LUANTI_GAME_PATH",
       "default_value": "/home/container/.luanti/games",
-      "user_viewable": false,
-      "user_editable": false,
+      "user_viewable": true,
+      "user_editable": true,
       "rules": [
         "required",
         "string",
         "max:255"
       ],
-      "sort": null
+      "sort": 11
     },
     {
       "name": "Max Players",
@@ -213,7 +211,7 @@
         "min:0",
         "max:65535"
       ],
-      "sort": null
+      "sort": 12
     },
     {
       "name": "message of the day",
@@ -227,7 +225,7 @@
         "string",
         "max:128"
       ],
-      "sort": null
+      "sort": 13
     },
     {
       "name": "Name of the admin player.",
@@ -241,7 +239,7 @@
         "string",
         "max:32"
       ],
-      "sort": null
+      "sort": 14
     },
     {
       "name": "Server name",
@@ -255,7 +253,7 @@
         "string",
         "max:64"
       ],
-      "sort": null
+      "sort": 15
     },
     {
       "name": "Server password",
@@ -269,7 +267,7 @@
         "string",
         "max:64"
       ],
-      "sort": null
+      "sort": 16
     },
     {
       "name": "Enable mod channels",
@@ -283,7 +281,7 @@
         "string",
         "in:true,false"
       ],
-      "sort": null
+      "sort": 17
     },
     {
       "name": "Server url",
@@ -294,10 +292,9 @@
       "user_editable": true,
       "rules": [
         "required",
-        "string",
-        ""
+        "string"
       ],
-      "sort": null
+      "sort": 18
     },
     {
       "name": "Show in server list",
@@ -310,7 +307,7 @@
         "string",
         "in:true,false"
       ],
-      "sort": null
+      "sort": 19
     },
     {
       "name": "World name",
@@ -324,7 +321,7 @@
         "string",
         "max:32"
       ],
-      "sort": null
+      "sort": 20
     },
     {
       "name": "Shared mods path",
@@ -338,21 +335,21 @@
         "string",
         "max:255"
       ],
-      "sort": null
+      "sort": 21
     },
     {
       "name": "Mod data path",
       "description": "Directory used by container startup helpers for mod-owned persistent data, including classroom pending settings.",
       "env_variable": "LUANTI_MOD_DATA_PATH",
       "default_value": "/home/container/.luanti/mod_data",
-      "user_viewable": false,
-      "user_editable": false,
+      "user_viewable": true,
+      "user_editable": true,
       "rules": [
         "required",
         "string",
         "max:255"
       ],
-      "sort": null
+      "sort": 22
     }
   ]
 }
