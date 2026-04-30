@@ -171,7 +171,7 @@
       "sort": 9
     },
     {
-      "name": "User data path",
+      "name": "Luanti user data path",
       "description": "Luanti user data directory. Keep this at /home/container/.luanti unless you are intentionally moving all server data.",
       "env_variable": "LUANTI_USER_PATH",
       "default_value": "/home/container/.luanti",
@@ -185,7 +185,7 @@
       "sort": 10
     },
     {
-      "name": "Game PATH",
+      "name": "Luanti game path",
       "description": "Additional game search path. Defaults to the server-local .luanti/games directory.",
       "env_variable": "LUANTI_GAME_PATH",
       "default_value": "/home/container/.luanti/games",
@@ -324,7 +324,7 @@
       "sort": 20
     },
     {
-      "name": "Shared mods path",
+      "name": "Luanti shared mods path",
       "description": "Additional mod search path inside the container (e.g. /home/mods). Mount a shared directory here via Pelican mounts so all servers share the same mods.",
       "env_variable": "LUANTI_MOD_PATH",
       "default_value": "/home/container/.luanti/mods",
@@ -338,7 +338,7 @@
       "sort": 21
     },
     {
-      "name": "Mod data path",
+      "name": "Luanti mod data path",
       "description": "Directory used by container startup helpers for mod-owned persistent data, including classroom pending settings.",
       "env_variable": "LUANTI_MOD_DATA_PATH",
       "default_value": "/home/container/.luanti/mod_data",
