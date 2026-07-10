@@ -284,6 +284,104 @@
       "sort": null
     },
     {
+      "name": "Classrooms damage",
+      "description": "Classroom-managed default for player damage in instances.",
+      "env_variable": "CLASSROOMS_ENABLE_DAMAGE",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Classrooms PvP",
+      "description": "Classroom-managed default for PvP in instances.",
+      "env_variable": "CLASSROOMS_ENABLE_PVP",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Classrooms hunger",
+      "description": "Classroom-managed default for Mineclonia hunger in instances.",
+      "env_variable": "CLASSROOMS_ENABLE_HUNGER",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Classrooms natural mobs",
+      "description": "Classroom-managed default for natural mob spawning in instances.",
+      "env_variable": "CLASSROOMS_MOBS_SPAWN",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Classrooms peaceful mobs",
+      "description": "Classroom-managed default for peaceful-only mobs in instances.",
+      "env_variable": "CLASSROOMS_ONLY_PEACEFUL_MOBS",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Classrooms fire block damage",
+      "description": "Classroom-managed default for fire block damage in instances.",
+      "env_variable": "CLASSROOMS_ENABLE_FIRE",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
+      "name": "Classrooms explosion block damage",
+      "description": "Classroom-managed default for explosion block damage in instances.",
+      "env_variable": "CLASSROOMS_EXPLOSIONS_GRIEFING",
+      "default_value": "",
+      "user_viewable": false,
+      "user_editable": false,
+      "rules": [
+        "nullable",
+        "string",
+        "in:true,false"
+      ],
+      "sort": null
+    },
+    {
       "name": "Server url",
       "description": "Homepage of server, to be displayed in the serverlist.",
       "env_variable": "SERVER_URL",

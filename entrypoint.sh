@@ -79,6 +79,16 @@ set_config_value() {
 	printf '%s = %s\n' "$key" "$value" >> "$file"
 }
 
+set_config_value_if_set() {
+	file="$1"
+	key="$2"
+	value="${3:-}"
+
+	if [ -n "$value" ]; then
+		set_config_value "$file" "$key" "$value"
+	fi
+}
+
 apply_luanti_config() {
 	config_file="/home/container/.luanti/luanti.conf"
 
@@ -98,11 +108,18 @@ apply_luanti_config() {
 	set_config_value "$config_file" "default_password" "${SERVER_PASSWORD:-}"
 	set_config_value "$config_file" "default_game" "${DEFAULT_GAME:-}"
 	set_config_value "$config_file" "enable_mod_channels" "${LUANTI_ENABLE_MOD_CHANNELS:-true}"
+	set_config_value_if_set "$config_file" "enable_damage" "${CLASSROOMS_ENABLE_DAMAGE:-}"
+	set_config_value_if_set "$config_file" "enable_pvp" "${CLASSROOMS_ENABLE_PVP:-}"
+	set_config_value_if_set "$config_file" "mcl_enable_hunger" "${CLASSROOMS_ENABLE_HUNGER:-}"
+	set_config_value_if_set "$config_file" "mobs_spawn" "${CLASSROOMS_MOBS_SPAWN:-}"
+	set_config_value_if_set "$config_file" "only_peaceful_mobs" "${CLASSROOMS_ONLY_PEACEFUL_MOBS:-}"
+	set_config_value_if_set "$config_file" "enable_fire" "${CLASSROOMS_ENABLE_FIRE:-}"
+	set_config_value_if_set "$config_file" "mcl_explosions_griefing" "${CLASSROOMS_EXPLOSIONS_GRIEFING:-}"
 }
 
 is_classrooms_pending_key() {
 	case "$1" in
-		enable_damage|enable_pvp|mcl_enable_hunger|mobs_spawn|only_peaceful_mobs|mcl_explosions_griefing|static_spawnpoint|classrooms_spawn_yaw|classrooms_spawn_pitch)
+		enable_damage|enable_pvp|mcl_enable_hunger|mobs_spawn|only_peaceful_mobs|enable_fire|mcl_explosions_griefing|static_spawnpoint|classrooms_spawn_yaw|classrooms_spawn_pitch)
 			return 0
 			;;
 		*)
